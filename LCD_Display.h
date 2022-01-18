@@ -35,26 +35,28 @@ class LCD_Display
         // TODO: implement vektor with pointer to gpio Objs
 
         bool OnOff = true;
-        uint8_t data = 0;
 
         void setPort(GPIONum _db0, GPIONum _db1, GPIONum _db2, GPIONum _db3, GPIONum _db4, GPIONum _db5, GPIONum _db6, GPIONum _db7, GPIONum _RW, GPIONum _RS, GPIONum _enable);
         void write8BitData(uint8_t _data);
         void waitBusyFlag();
         uint8_t readPort();
-        int clearDisplay();
-        int returnHome();
-        int entryModeSet(bool _id, bool _shift);
-        int displayOnOff(bool _display, bool _cursor, bool _cursorBlink);
-        int cursorOrDisplayShift(bool _displayCursor, bool _rightLeft);
-        int functionSet(bool _lengthControl, bool _lineNumberControl, bool _fontTypeControl);
-        int setAdrCGRAM();
-        int setAdrDDRAM();
-        int readBFandAdr();
+        void initializeLCD();
+        void resetDisplay();
+        void clearDisplay();
+        void returnHome();
+        
+        void entryModeSet(bool _id, bool _shift);
+        void displayOnOff(bool _display, bool _cursor, bool _cursorBlink);
+        void cursorOrDisplayShift(bool _displayCursor, bool _rightLeft);
+        void functionSet(bool _lengthControl, bool _lineNumberControl, bool _fontTypeControl);
+        void putChar(uint8_t _zeichen);
+        void setAddrCGRAM(uint8_t _addr);
+        void setAddrDDRAM(uint8_t _addr);
+        uint8_t readBFandAddr();
         int writeDataToRam();
         int readDataFromRam();
-        int initializeLCD();
-        int resetDisplay();
-        int putChar(uint8_t _zeichen);
+
+
 
         
 
