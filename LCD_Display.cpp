@@ -199,14 +199,11 @@ void LCD_Display::displayOnOff(bool _display, bool _cursor, bool _cursorBlink)
     bool cursorBlink = _cursorBlink;
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x08;
     if(cursorBlink) {   prepData += 1 << 0; }
@@ -228,14 +225,11 @@ void LCD_Display::cursorOrDisplayShift(bool _displayCursor, bool _rightLeft)
     bool rightLeft = _rightLeft;
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x10;
     if(rightLeft){(prepData += 1 << 2);} 
@@ -256,19 +250,17 @@ void LCD_Display::functionSet(bool _dl, bool _n, bool _f)
 
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+    
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x20;
     if(dl){prepData += 1 << 4;}
     if(n){(prepData += 1 << 3);}
     if(f){ (prepData += 1 << 2);}
+
     int show = (int) prepData;
     LOG(INFO) << "PrepData: " <<show;
     write8BitData(prepData);
@@ -283,14 +275,12 @@ void LCD_Display::putChar(uint8_t _zeichen)
     RS.setValue(true);
     RW.setValue(false);
     uint8_t zeichen = _zeichen;
-    db0.setValue(zeichen & 0x01);
-    db1.setValue(zeichen & 0x02);
-    db2.setValue(zeichen & 0x04);
-    db3.setValue(zeichen & 0x08);
-    db4.setValue(zeichen & 0x10);
-    db5.setValue(zeichen & 0x20);
-    db6.setValue(zeichen & 0x40);
-    db7.setValue(zeichen & 0x80);
+
+    for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+        Port[i]->setValue(zeichen & (1 << i));
+    }
+
     enable.setValue(HIGH);
     enable.setValue(LOW);
     time.sleepFor(80, usec);
@@ -305,12 +295,11 @@ void LCD_Display::setAddrCGRAM(uint8_t _addr)
     RS.setValue(false);
     db7.setValue(false);
     db6.setValue(false);
-    db0.setValue(addr & 0x01);
-    db1.setValue(addr & 0x02);
-    db2.setValue(addr & 0x04);
-    db3.setValue(addr & 0x08);
-    db4.setValue(addr & 0x10);
-    db5.setValue(addr & 0x20);
+
+    for(unsigned int i = 0; i< 7; i ++)
+    {
+        Port[i]->setValue(addr & (1 << i));
+    }
 
     enable.setValue(HIGH);
     enable.setValue(LOW);
@@ -321,17 +310,16 @@ void LCD_Display::setAddrDDRAM(uint8_t _addr)
 {
     LOG(INFO) << "_____________SET DDRAM ADDR_______________";
     uint8_t addr = _addr;
+    unsigned int peter2 =(unsigned int)  addr;
+    std::cout <<  peter2 << std::endl;
     RW.setValue(false);
     RS.setValue(false);
     db7.setValue(true);
     
-    db0.setValue(addr & 0x01);
-    db1.setValue(addr & 0x02);
-    db2.setValue(addr & 0x04);
-    db3.setValue(addr & 0x08);
-    db4.setValue(addr & 0x10);
-    db5.setValue(addr & 0x20);
-    db6.setValue(addr & 0x40);
+    for(unsigned int i = 0; i< 7; i ++)
+    {
+        Port[i]->setValue(addr & (1 << i));
+    }
 
     enable.setValue(HIGH);
     enable.setValue(LOW);
@@ -345,17 +333,14 @@ uint8_t LCD_Display::readBFandAddr()
     bool busyFlag = true;
     bool output;
     
-    db0.setDirection(INPUT);
-    db1.setDirection(INPUT);
-    db2.setDirection(INPUT);
-    db3.setDirection(INPUT);
-    db4.setDirection(INPUT);
-    db5.setDirection(INPUT);
-    db6.setDirection(INPUT);
-    db7.setDirection(INPUT);
+     for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+       Port[i]->setDirection(INPUT);
+    }
 
     RS.setValue(LOW);
     RW.setValue(HIGH);
+
     LOG(INFO) << "Waiting for BF.. ";
     while(busyFlag)
     {
@@ -364,24 +349,17 @@ uint8_t LCD_Display::readBFandAddr()
         enable.setValue(LOW);
         busyFlag = db7.getValue(); 
     };
-       
-    data |= db0.getValue()<<0;
-    data |= db1.getValue()<<1;
-    data |= db2.getValue()<<2;
-    data |= db3.getValue()<<3;
-    data |= db4.getValue()<<4;
-    data |= db5.getValue()<<5;
-    data |= db6.getValue()<<6;
-    data |= db7.getValue()<<6;
 
-    db7.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db0.setDirection(OUTPUT);
+    for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+       data |= Port[i]->getValue() << i;
+    }
+ 
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
+
     RW.setValue(LOW);
     return data;
 }
