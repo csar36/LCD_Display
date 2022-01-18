@@ -3,7 +3,7 @@
 
 LCD_Display::LCD_Display(){}
 
-LCD_Display::~LCD_Display(){}
+
 
 void LCD_Display::setPort(GPIONum _db0, GPIONum _db1, GPIONum _db2, GPIONum _db3, GPIONum _db4, GPIONum _db5, GPIONum _db6, GPIONum _db7, GPIONum _RW, GPIONum _RS, GPIONum _enable)
 {

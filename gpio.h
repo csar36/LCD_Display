@@ -54,7 +54,10 @@ class GPIOPin
     public:
         GPIOPin();
         GPIOPin(GPIONum _GpioNumber);
-        ~GPIOPin();
+        GPIOPin(const GPIOPin &) = delete;
+        GPIOPin &operator=(const GPIOPin &) = delete;
+        GPIOPin(GPIOPin &&) = delete;
+        GPIOPin &operator=(GPIOPin &&) = delete;
 
         int GpioNumber;
         bool direction = INPUT;
