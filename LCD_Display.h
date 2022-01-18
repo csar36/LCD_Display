@@ -17,7 +17,10 @@ class LCD_Display
 {
     public:
         LCD_Display();
-        ~LCD_Display();
+        LCD_Display(const LCD_Display &) = delete;
+        LCD_Display &operator=(const LCD_Display &) = delete;
+        LCD_Display(LCD_Display &&) = delete;
+        LCD_Display &operator=(LCD_Display &&) = delete;
 
         GPIOPin db0;
         GPIOPin db1;

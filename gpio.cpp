@@ -5,8 +5,6 @@
 //Funktionen entsprechend Klassenfunktionalitäten anpassen
 GPIOPin::GPIOPin()
 {}
-GPIOPin::~GPIOPin()
-{}
 
 //*************PFADE************//
 void GPIOPin::setExportPath()
