@@ -1,3 +1,6 @@
+#ifndef LCD_DISPLAY_H
+#define LCD_DISPLAY_H
+
 
 #include "gpio.h"
 #include "Timer.h"
@@ -59,3 +62,5 @@ class LCD_Display
 
 
 };
+
+#endif

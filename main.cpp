@@ -1,11 +1,13 @@
 
 #include "stdafx.h"
 #include "LCD_Display.h"
+#include "Timer.h"
 
 INITIALIZE_EASYLOGGINGPP
 
 int main()
 {
+    std::cout << "Wir schlafen jetzt für 3 sekunden"<< std::endl;
     LCD_Display display;
     display.setPort(GPIO_21, GPIO_20, GPIO_16, GPIO_26, GPIO_19, GPIO_13, GPIO_6, GPIO_5, GPIO_17, GPIO_27, GPIO_12);
     display.resetDisplay();

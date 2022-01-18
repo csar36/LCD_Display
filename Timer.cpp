@@ -1,7 +1,4 @@
 #include "Timer.h"
-
-
-
 Timer::Timer()
 {
     start_t = clock();
@@ -60,7 +57,7 @@ double Timer::getTime(TimerUnit _unit)
                         break;
             default: std::cout << "TIMER_UNIT_ERROR" << std::endl; break;
         }
-    return time;
+    return timeInUnit;
 }
 
 
@@ -73,5 +70,5 @@ void Timer::sleepFor(double _time, TimerUnit _unit)
     start_t = clock();
     do{
 
-    }while(time < getTime(unit));
+    }while(getTime(unit) < time);
 }

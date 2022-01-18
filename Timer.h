@@ -1,3 +1,5 @@
+#ifndef TIMER_H
+#define TIMER_H
 #include "stdafx.h"
 
 /****** Timer.h/TimerOption
@@ -42,8 +44,9 @@ enum TimerUnit
 */
 class Timer
 {
-      private:
+      public:
          Timer();
+      private:
          //TimerOption unit;
          clock_t start_t;
          clock_t end_t;
@@ -55,3 +58,6 @@ class Timer
          double getTime(TimerUnit);
          void sleepFor(double _time, TimerUnit _unit);
 };
+
+
+#endif

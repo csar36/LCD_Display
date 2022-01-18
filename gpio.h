@@ -1,3 +1,5 @@
+#ifndef GPIO_H
+#define GPIO_H
 #include "stdafx.h"
 #include "easylogging++.h"
 #define GPIO_PATH "/sys/class/gpio"
@@ -75,3 +77,4 @@ class GPIOPin
 
 };
 
+#endif
