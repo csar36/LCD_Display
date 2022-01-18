@@ -31,6 +31,7 @@ void LCD_Display::setPort(GPIONum _db0, GPIONum _db1, GPIONum _db2, GPIONum _db3
 
 void LCD_Display::write8BitData(uint8_t _data)
 {
+    uint8_t data;
     data = _data;
     db0.setValue(data & 0x01);
     db1.setValue(data & 0x02);
@@ -82,27 +83,50 @@ void LCD_Display::waitBusyFlag()
     return;
 }
 
-
-uint8_t LCD_Display::readPort()
-{
-    bool val;
-    uint8_t prepData = 0x00;
-    val = db0.getValue();
-    if(db0.getValue()){(prepData += 1 << 0);}
-    if(db1.getValue()){(prepData += 1 << 0);}
-    if(db2.getValue()){(prepData += 1 << 0);}
-    if(db3.getValue()){(prepData += 1 << 0);}
-    if(db4.getValue()){(prepData += 1 << 0);}
-    if(db5.getValue()){(prepData += 1 << 0);}
-    if(db6.getValue()){(prepData += 1 << 0);}
-    if(db7.getValue()){(prepData += 1 << 0);}
-
-    return data;
+void LCD_Display::initializeLCD()
+{   
+    LOG(INFO) << "_____________INIT DISPLAY_______________";
+    time.sleepFor(50, msec);
+    LOG(INFO) << "Function Set";
+    functionSet(true, true, false);
+    time.sleepFor(40, usec);
+    LOG(INFO) << "Function Set";
+    functionSet(true, true, false);
+    time.sleepFor(40, usec);
+    LOG(INFO) << "Display ON/OFF";
+    displayOnOff(true, false, false);
+    time.sleepFor(40, usec);
+    LOG(INFO) << "Clear Display";
+    clearDisplay();
+    time.sleepFor(1600, usec);
+    LOG(INFO) << "Entry Mode Set";
+    entryModeSet(true, false);
+    
 }
 
+void LCD_Display::resetDisplay()
 
-int LCD_Display::clearDisplay()
 {
+    LOG(INFO) << "_____________RESET DISPLAY_______________";
+    LOG(INFO) << "Clear Display";
+    clearDisplay();
+    time.sleepFor(1600, usec);
+    LOG(INFO) << "Function Set";
+    functionSet(true, false, false);
+    time.sleepFor(37, usec);
+    LOG(INFO) << "Display OFF";
+    displayOnOff(false, false, false);
+    time.sleepFor(37, usec);
+    LOG(INFO) << "Entry Mode Set";
+    entryModeSet(true, false);
+    time.sleepFor(80, usec);
+    LOG(INFO) << "wait busy Flag";
+    waitBusyFlag();
+}
+
+void LCD_Display::clearDisplay()
+{
+    LOG(INFO) << "_____________CLEAR DISPLAY_______________";
     db7.setDirection(OUTPUT);
     db6.setDirection(OUTPUT);
     db5.setDirection(OUTPUT);
@@ -118,12 +142,11 @@ int LCD_Display::clearDisplay()
     enable.setValue(LOW);
     time.sleepFor(80, usec);
     waitBusyFlag();
-    return 0; //could be used for Error-Handling
 }
 
-
-int LCD_Display::returnHome()
+void LCD_Display::returnHome()
 {
+    LOG(INFO) << "_____________RETURN HOME_______________";
     db7.setDirection(OUTPUT);
     db6.setDirection(OUTPUT);
     db5.setDirection(OUTPUT);
@@ -140,12 +163,11 @@ int LCD_Display::returnHome()
     enable.setValue(LOW);
     time.sleepFor(80, usec);
     waitBusyFlag();
-    return 0;
 }
 
-
-int LCD_Display::entryModeSet(bool _id, bool _shift)
+void LCD_Display::entryModeSet(bool _id, bool _shift)
 {
+    LOG(INFO) << "_____________ENTRY MODE SET_______________";
     bool id;
     bool shift;
     id = _id;
@@ -168,26 +190,20 @@ int LCD_Display::entryModeSet(bool _id, bool _shift)
     enable.setValue(HIGH);
     enable.setValue(LOW);
     time.sleepFor(80, usec);
-    //waitBusyFlag();
-    return 0;
 }
 
-
-int LCD_Display::displayOnOff(bool _display, bool _cursor, bool _cursorBlink)
+void LCD_Display::displayOnOff(bool _display, bool _cursor, bool _cursorBlink)
 {
     bool display = _display;
     bool cursor = _cursor;
     bool cursorBlink = _cursorBlink;
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x08;
     if(cursorBlink) {   prepData += 1 << 0; }
@@ -200,23 +216,20 @@ int LCD_Display::displayOnOff(bool _display, bool _cursor, bool _cursorBlink)
     enable.setValue(LOW);
     time.sleepFor(80, usec);
     waitBusyFlag();
-    return 0;
 }
 
-int LCD_Display::cursorOrDisplayShift(bool _displayCursor, bool _rightLeft)
+void LCD_Display::cursorOrDisplayShift(bool _displayCursor, bool _rightLeft)
 {
+    LOG(INFO) << "_____________CURSOR OR DISPLAY SHIFT_______________";
     bool displayCursor = _displayCursor;
     bool rightLeft = _rightLeft;
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x10;
     if(rightLeft){(prepData += 1 << 2);} 
@@ -226,102 +239,139 @@ int LCD_Display::cursorOrDisplayShift(bool _displayCursor, bool _rightLeft)
     enable.setValue(LOW);
     time.sleepFor(80, usec);
     waitBusyFlag();
-    return 0;
 }
 
-int LCD_Display::functionSet(bool _dl, bool _n, bool _f)
+void LCD_Display::functionSet(bool _dl, bool _n, bool _f)
 {
+    LOG(INFO) << "_____________FUNCTION SET_______________";
     bool dl = _dl;
     bool n = _n;
     bool f = _f;
 
     RW.setValue(0);
     RS.setValue(0);
-    db0.setDirection(OUTPUT);
-    db1.setDirection(OUTPUT);
-    db2.setDirection(OUTPUT);
-    db3.setDirection(OUTPUT);
-    db4.setDirection(OUTPUT);
-    db5.setDirection(OUTPUT);
-    db6.setDirection(OUTPUT);
-    db7.setDirection(OUTPUT);
+    
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
 
     uint8_t prepData = 0x20;
     if(dl){prepData += 1 << 4;}
     if(n){(prepData += 1 << 3);}
     if(f){ (prepData += 1 << 2);}
+
     int show = (int) prepData;
     LOG(INFO) << "PrepData: " <<show;
     write8BitData(prepData);
     enable.setValue(HIGH);
     enable.setValue(LOW);
     time.sleepFor(80, usec);
-    //waitBusyFlag();
-    return 0;
 }
 
-int LCD_Display::putChar(uint8_t _zeichen)
+void LCD_Display::putChar(uint8_t _zeichen)
 {   
-
+    LOG(INFO) << "_____________PUT CHAR_______________";
     RS.setValue(true);
     RW.setValue(false);
     uint8_t zeichen = _zeichen;
-    db0.setValue(zeichen & 0x01);
-    db1.setValue(zeichen & 0x02);
-    db2.setValue(zeichen & 0x04);
-    db3.setValue(zeichen & 0x08);
-    db4.setValue(zeichen & 0x10);
-    db5.setValue(zeichen & 0x20);
-    db6.setValue(zeichen & 0x40);
-    db7.setValue(zeichen & 0x80);
+
+    for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+        Port[i]->setValue(zeichen & (1 << i));
+    }
+
     enable.setValue(HIGH);
     enable.setValue(LOW);
     time.sleepFor(80, usec);
-    waitBusyFlag();
-    return 0;
-    
-
+    waitBusyFlag();   
 }
 
-int LCD_Display::initializeLCD()
-{   
-    LOG(INFO) << "_____________INIT DISPLAY_______________";
-    time.sleepFor(50, msec);
-    LOG(INFO) << "Function Set";
-    functionSet(true, true, false);
-    time.sleepFor(40, usec);
-    LOG(INFO) << "Function Set";
-    functionSet(true, true, false);
-    time.sleepFor(40, usec);
-    LOG(INFO) << "Display ON/OFF";
-    displayOnOff(true, false, false);
-    time.sleepFor(40, usec);
-    LOG(INFO) << "Clear Display";
-    clearDisplay();
-    time.sleepFor(1600, usec);
-    LOG(INFO) << "Entry Mode Set";
-    entryModeSet(true, false);
-    return 0;
-}
-
-
-int LCD_Display::resetDisplay()
+void LCD_Display::setAddrCGRAM(uint8_t _addr)
 {
-    LOG(INFO) << "_____________RESET DISPLAY_______________";
-    LOG(INFO) << "Clear Display";
-    clearDisplay();
-    time.sleepFor(1600, usec);
-    LOG(INFO) << "Function Set";
-    functionSet(true, false, false);
-    time.sleepFor(37, usec);
-    LOG(INFO) << "Display OFF";
-    displayOnOff(false, false, false);
-    time.sleepFor(37, usec);
-    LOG(INFO) << "Entry Mode Set";
-    entryModeSet(true, false);
-    time.sleepFor(80, usec);
-    LOG(INFO) << "wait busy Flag";
-    waitBusyFlag();
-    return 0;
+    LOG(INFO) << "_____________SET CGRAM ADDR_______________";
+    uint8_t addr = _addr;
+    RW.setValue(false);
+    RS.setValue(false);
+    db7.setValue(false);
+    db6.setValue(false);
+
+    for(unsigned int i = 0; i< 7; i ++)
+    {
+        Port[i]->setValue(addr & (1 << i));
+    }
+
+    enable.setValue(HIGH);
+    enable.setValue(LOW);
+    time.sleepFor(37, usec); 
+}
+
+void LCD_Display::setAddrDDRAM(uint8_t _addr)
+{
+    LOG(INFO) << "_____________SET DDRAM ADDR_______________";
+    uint8_t addr = _addr;
+    unsigned int peter2 =(unsigned int)  addr;
+    std::cout <<  peter2 << std::endl;
+    RW.setValue(false);
+    RS.setValue(false);
+    db7.setValue(true);
+    
+    for(unsigned int i = 0; i< 7; i ++)
+    {
+        Port[i]->setValue(addr & (1 << i));
+    }
+
+    enable.setValue(HIGH);
+    enable.setValue(LOW);
+    time.sleepFor(37, usec);   
+}
+
+uint8_t LCD_Display::readBFandAddr()
+{
+    LOG(INFO) << "_____________READ BF AND ADDR_______________";
+    uint8_t data = 0;
+    bool busyFlag = true;
+    bool output;
+    
+     for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+       Port[i]->setDirection(INPUT);
+    }
+
+    RS.setValue(LOW);
+    RW.setValue(HIGH);
+
+    LOG(INFO) << "Waiting for BF.. ";
+    while(busyFlag)
+    {
+        time.sleepFor(85, usec);
+        enable.setValue(HIGH);
+        enable.setValue(LOW);
+        busyFlag = db7.getValue(); 
+    };
+
+    for(unsigned int i = 0; i< Port.size(); i ++)
+    {
+       data |= Port[i]->getValue() << i;
+    }
+ 
+    for(unsigned int i = 0; i<Port.size(); i ++)
+    {
+       Port[i]->setDirection(OUTPUT);
+    }
+
+    RW.setValue(LOW);
+    return data;
+}
+
+int LCD_Display::writeDataToRam()
+{
 
 }
+
+int LCD_Display::readDataFromRam()
+{
+
+}
+
+        
